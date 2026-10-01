@@ -109,7 +109,7 @@
     <h2>你的主要方式</h2>
     <p id="primary-text"></p>
   </div>
-  <div class="card">
+  <div class="card" id="secondary-card">
     <h2>你的补充方式</h2>
     <p id="secondary-text"></p>
   </div>
@@ -126,6 +126,7 @@
     <p>点击下方按钮，你的匿名结果会提交给研究者。不会收集姓名、手机号等个人信息。</p>
     <button id="btn-collect">提交结果</button>
     <p class="note" id="collect-note"></p>
+    <p class="note">提示：点击后会打开一个新页面，请在新页面底部再点击一次“提交”，数据才会被记录。谢谢你的帮助！</p>
   </div>
   <div class="disclaimer">
     本测评基于隐喻性人格描述，仅供自我探索与沟通参考，不构成心理诊断、医疗建议、招聘依据或任何高风险决策依据。如果你正经历严重心理困扰，请寻求专业心理援助。
@@ -222,16 +223,16 @@ const elementInfo = {
   }
 };
 
-/* ============ Google 表单配置（你之后要改这里） ============ */
-const FORM_URL = '在这里粘贴你的 Google 表单预填链接';
+/* ============ Google 表单配置（已填好） ============ */
+const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdO6UfSfVeImpOqGviznDUz1KNIsNkWCluRi8a0eviRy1d2Uw/viewform';
 const ENTRY = {
-  fire: 'entry.0000001',
-  earth: 'entry.0000002',
-  air: 'entry.0000003',
-  water: 'entry.0000004',
-  primary: 'entry.0000005',
-  secondary: 'entry.0000006',
-  answers: 'entry.0000007'
+  fire: 'entry.1292527030',
+  earth: 'entry.1235702862',
+  air: 'entry.866080874',
+  water: 'entry.1364794180',
+  primary: 'entry.1906639736',
+  secondary: 'entry.22188208',
+  answers: 'entry.651943229'
 };
 
 /* ============ 以下逻辑不要改 ============ */
@@ -339,8 +340,14 @@ function renderResult() {
       `你的主元素是${elementInfo[p].name}。${elementInfo[p].green}优势是${elementInfo[p].strengths}盲点是${elementInfo[p].blind}关系建议：${elementInfo[p].relation}`;
   }
 
-  document.getElementById('secondary-text').textContent =
-    `你的副元素是${elementInfo[s].name}。它让你在${elementInfo[p].name}之外，也能${elementInfo[s].desc}。当情境需要时，你可以调用这种补充方式。`;
+  const secondaryCard = document.getElementById('secondary-card');
+  if (s) {
+    document.getElementById('secondary-text').textContent =
+      `你的副元素是${elementInfo[s].name}。它让你在${elementInfo[p].name}之外，也能${elementInfo[s].desc}。当情境需要时，你可以调用这种补充方式。`;
+    secondaryCard.classList.remove('hidden');
+  } else {
+    secondaryCard.classList.add('hidden');
+  }
 
   document.getElementById('relationship-list').innerHTML = `
     <li>与火相处：直接、清楚、给出行动空间。</li>
