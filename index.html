@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四元素人格测评</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f7f6f3;
+    color: #2c2c2c;
+    line-height: 1.7;
+    padding: 20px;
+  }
+  .page { max-width: 640px; margin: 0 auto; }
+  .hidden { display: none; }
+  h1 { font-size: 24px; margin-bottom: 12px; }
+  h2 { font-size: 20px; margin: 24px 0 12px; }
+  p { margin-bottom: 12px; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .question { margin-bottom: 24px; }
+  .question p { font-weight: 500; margin-bottom: 10px; }
+  .options label {
+    display: block;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border: 1px solid #e0ddd8;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .options label:hover { background: #f2efe9; }
+  .options input { margin-right: 8px; }
+  button {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: #8a6d3b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  button:hover { background: #755c30; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  .bar-row { margin-bottom: 10px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 4px; }
+  .bar-bg { background: #eee; border-radius: 6px; height: 14px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; }
+  .fire { background: #c0392b; }
+  .earth { background: #7f8c4a; }
+  .air { background: #5b8fb9; }
+  .water { background: #4a7c8c; }
+  .note { font-size: 13px; color: #888; margin-top: 8px; }
+  .disclaimer { font-size: 13px; color: #777; background: #f0ede7; padding: 14px; border-radius: 8px; margin-top: 16px; }
+  .consent { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0; font-size: 14px; }
+  .consent input { margin-top: 4px; }
+  a { color: #8a6d3b; }
+</style>
+</head>
+<body>
+
+<!-- 欢迎页 -->
+<div id="page-welcome" class="page">
+  <div class="card">
+    <h1>四元素人格测评</h1>
+    <p>这是一个基于隐喻的自我探索与沟通工具。它用火、土、风、水四种方式，帮你看见自己目前更常使用的能量倾向。</p>
+    <p><strong>它不是什么：</strong>不是科学诊断，不是心理治疗，不是招聘依据，不定义你的一生。</p>
+    <p><strong>它是什么：</strong>一面镜子，一张地图，一句邀请。</p>
+
+    <div class="consent">
+      <input type="checkbox" id="consent">
+      <label for="consent">我已阅读以上说明，理解本测评仅供自我探索与沟通参考，不构成心理诊断或高风险决策依据。我同意匿名提交测评结果用于研究。</label>
+    </div>
+
+    <button id="btn-start" disabled>开始测评</button>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div id="page-quiz" class="page hidden">
+  <div class="card">
+    <h1>请根据你的真实感受作答</h1>
+    <p class="note">共 40 题，大约需要 5–8 分钟。没有对错，选最接近你的那一项。</p>
+  </div>
+  <form id="quiz-form"></form>
+  <button id="btn-submit" disabled>提交并查看结果</button>
+  <p class="note" id="progress">已答 0 / 40</p>
+</div>
+
+<!-- 结果页 -->
+<div id="page-result" class="page hidden">
+  <div class="card">
+    <h1>你的四元素能量分布</h1>
+    <div id="chart"></div>
+    <p id="summary" style="margin-top:16px;"></p>
+  </div>
+  <div class="card">
+    <h2>你的主要方式</h2>
+    <p id="primary-text"></p>
+  </div>
+  <div class="card">
+    <h2>你的补充方式</h2>
+    <p id="secondary-text"></p>
+  </div>
+  <div class="card">
+    <h2>关系互动建议</h2>
+    <ul id="relationship-list" style="padding-left:20px;"></ul>
+  </div>
+  <div class="card">
+    <h2>成长练习</h2>
+    <ul id="growth-list" style="padding-left:20px;"></ul>
+  </div>
+  <div class="card">
+    <h2>提交你的结果</h2>
+    <p>点击下方按钮，你的匿名结果会提交给研究者。不会收集姓名、手机号等个人信息。</p>
+    <button id="btn-collect">提交结果</button>
+    <p class="note" id="collect-note"></p>
+  </div>
+  <div class="disclaimer">
+    本测评基于隐喻性人格描述，仅供自我探索与沟通参考，不构成心理诊断、医疗建议、招聘依据或任何高风险决策依据。如果你正经历严重心理困扰，请寻求专业心理援助。
+  </div>
+</div>
+
+<script>
+/* ============ 题目数据（不要改） ============ */
+const questions = [
+  { id:'F1', el:'fire', text:'在团队停滞时，我通常会先推动行动。', rev:false },
+  { id:'F2', el:'fire', text:'我享受快速做决定并承担后果。', rev:false },
+  { id:'F3', el:'fire', text:'我倾向于主动带领大家往前走。', rev:false },
+  { id:'F4', el:'fire', text:'面对挑战时，我容易感到兴奋而不是退缩。', rev:false },
+  { id:'F5', el:'fire', text:'我常常是气氛的带动者。', rev:false },
+  { id:'F6', el:'fire', text:'我不喜欢等待，喜欢立刻开始。', rev:false },
+  { id:'F7', el:'fire', text:'我敢于冒险，愿意尝试新事物。', rev:false },
+  { id:'F8', el:'fire', text:'我通常避免成为注意力的焦点。', rev:true },
+  { id:'F9', el:'fire', text:'我很少主动推动别人做事。', rev:true },
+  { id:'F10', el:'fire', text:'我更喜欢跟随而不是主导。', rev:true },
+
+  { id:'E1', el:'earth', text:'我习惯提前制定计划并按计划执行。', rev:false },
+  { id:'E2', el:'earth', text:'我重视承诺，答应的事会尽力完成。', rev:false },
+  { id:'E3', el:'earth', text:'我喜欢有秩序、可预测的环境。', rev:false },
+  { id:'E4', el:'earth', text:'我做事注重实际效果，不喜欢空谈。', rev:false },
+  { id:'E5', el:'earth', text:'我通常是团队中提供稳定感的人。', rev:false },
+  { id:'E6', el:'earth', text:'我会仔细检查细节，避免出错。', rev:false },
+  { id:'E7', el:'earth', text:'我愿意承担责任并坚持到底。', rev:false },
+  { id:'E8', el:'earth', text:'我经常临时改变计划。', rev:true },
+  { id:'E9', el:'earth', text:'我不太在意规则和流程。', rev:true },
+  { id:'E10', el:'earth', text:'我容易半途而废。', rev:true },
+
+  { id:'A1', el:'air', text:'我喜欢分析问题，寻找背后的逻辑。', rev:false },
+  { id:'A2', el:'air', text:'我享受与人交流想法和观点。', rev:false },
+  { id:'A3', el:'air', text:'我常常能提出新的创意或角度。', rev:false },
+  { id:'A4', el:'air', text:'我善于把不同信息连接起来。', rev:false },
+  { id:'A5', el:'air', text:'我喜欢用语言表达自己的想法。', rev:false },
+  { id:'A6', el:'air', text:'我倾向于先思考再行动。', rev:false },
+  { id:'A7', el:'air', text:'我好奇心强，喜欢学习新知识。', rev:false },
+  { id:'A8', el:'air', text:'我讨厌讨论抽象的概念。', rev:true },
+  { id:'A9', el:'air', text:'我不太擅长用语言表达感受。', rev:true },
+  { id:'A10', el:'air', text:'我很少提出新点子。', rev:true },
+
+  { id:'W1', el:'water', text:'我能敏锐察觉他人的情绪变化。', rev:false },
+  { id:'W2', el:'water', text:'我倾向于先照顾关系再处理事情。', rev:false },
+  { id:'W3', el:'water', text:'我常常愿意倾听别人的烦恼。', rev:false },
+  { id:'W4', el:'water', text:'我重视和谐，尽量避免冲突。', rev:false },
+  { id:'W5', el:'water', text:'我做决定时常常依靠直觉。', rev:false },
+  { id:'W6', el:'water', text:'我容易对他人的处境产生共情。', rev:false },
+  { id:'W7', el:'water', text:'我乐于包容不同的人。', rev:false },
+  { id:'W8', el:'water', text:'我很少关心别人的感受。', rev:true },
+  { id:'W9', el:'water', text:'我倾向于用强硬手段解决冲突。', rev:true },
+  { id:'W10', el:'water', text:'我不太容易理解别人的情绪。', rev:true }
+];
+
+const labels = ['非常不同意','不同意','中立','同意','非常同意'];
+
+/* ============ 元素文案库（不要改） ============ */
+const elementInfo = {
+  fire: {
+    name:'火',
+    desc:'主动推进、快速行动、在停滞中带动他人',
+    strengths:'行动力强，愿意先迈出一步；热情外显，能带动气氛；面对挑战容易感到兴奋；敢于冒险，愿意尝试新事物。',
+    blind:'可能急躁，忽略他人节奏；可能过度主导，让别人难以表达；可能把“推进”当成唯一正确方向。',
+    relation:'先倾听，再推进；给他人空间，不替别人做决定；询问感受，而不只问进度。',
+    growth:['暂停三秒再回应。','问一句：“你现在感觉怎么样？”','把一件任务分配出去。'],
+    green:'你目前更常以火的方式带动局面。'
+  },
+  earth: {
+    name:'土',
+    desc:'提供稳定、制定计划、守住承诺',
+    strengths:'重视秩序与可预测性；务实，注重实际效果；可靠，答应的事会尽力完成；愿意承担责任并坚持到底。',
+    blind:'可能固执，抗拒变化；可能过度谨慎，错过机会；可能把规则看得比人更重要。',
+    relation:'表达弹性，尝试小步调整；说明变化的原因，而不是突然改变；允许别人用不同方式完成事情。',
+    growth:['尝试一件小的新事物。','接受一个不完美的结果。','对变化说：“我可以先试试看。”'],
+    green:'你目前更常以土的方式提供稳定。'
+  },
+  air: {
+    name:'风',
+    desc:'思考分析、连接信息、用语言表达',
+    strengths:'喜欢分析问题，寻找背后逻辑；善于沟通，能表达想法；创意丰富，常提出新角度；好奇心强，喜欢学习新知识。',
+    blind:'可能分散，难以聚焦；可能过度思考，延迟行动；可能用理性回避情绪。',
+    relation:'聚焦重点，少绕弯；照顾对方感受，而不只讲道理；给出明确回应，而不是无限讨论。',
+    growth:['设定优先级，一次只做一件。','练习共情，先感受再分析。','把想法写成可执行步骤。'],
+    green:'你目前更常以风的方式思考与连接。'
+  },
+  water: {
+    name:'水',
+    desc:'共情理解、照顾关系、调和冲突',
+    strengths:'能敏锐察觉他人情绪；愿意倾听，容易让人感到被理解；重视和谐，乐于包容；做决定时常依靠直觉。',
+    blind:'可能过度承担，边界模糊；可能回避冲突，压抑需求；可能因他人情绪而失去方向。',
+    relation:'设立边界，表达需求；练习说不，不必解释太多；允许冲突存在，而不是立刻调和。',
+    growth:['每天留一点只属于自己的时间。','把“我需要”说出来。','区分“他的情绪”和“我的责任”。'],
+    green:'你目前更常以水的方式理解他人。'
+  }
+};
+
+/* ============ Google 表单配置（你之后要改这里） ============ */
+const FORM_URL = '在这里粘贴你的 Google 表单预填链接';
+const ENTRY = {
+  fire: 'entry.0000001',
+  earth: 'entry.0000002',
+  air: 'entry.0000003',
+  water: 'entry.0000004',
+  primary: 'entry.0000005',
+  secondary: 'entry.0000006',
+  answers: 'entry.0000007'
+};
+
+/* ============ 以下逻辑不要改 ============ */
+const state = { answers: {}, result: null };
+
+// 欢迎页
+const consent = document.getElementById('consent');
+const btnStart = document.getElementById('btn-start');
+consent.addEventListener('change', () => { btnStart.disabled = !consent.checked; });
+btnStart.addEventListener('click', () => {
+  document.getElementById('page-welcome').classList.add('hidden');
+  document.getElementById('page-quiz').classList.remove('hidden');
+  renderQuestions();
+});
+
+// 渲染题目
+function renderQuestions() {
+  const form = document.getElementById('quiz-form');
+  const order = [...questions].sort(() => Math.random() - 0.5);
+  form.innerHTML = order.map((q, i) => `
+    <div class="card question">
+      <p>${i + 1}. ${q.text}</p>
+      <div class="options">
+        ${labels.map((lb, idx) => `
+          <label>
+            <input type="radio" name="${q.id}" value="${idx + 1}" data-qid="${q.id}">
+            ${lb}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  form.addEventListener('change', (e) => {
+    if (e.target.name) {
+      state.answers[e.target.dataset.qid] = parseInt(e.target.value, 10);
+      updateProgress();
+    }
+  });
+}
+
+function updateProgress() {
+  const n = Object.keys(state.answers).length;
+  document.getElementById('progress').textContent = `已答 ${n} / 40`;
+  document.getElementById('btn-submit').disabled = n < 40;
+}
+
+document.getElementById('btn-submit').addEventListener('click', () => {
+  calculate();
+  document.getElementById('page-quiz').classList.add('hidden');
+  document.getElementById('page-result').classList.remove('hidden');
+  renderResult();
+});
+
+// 计分
+function calculate() {
+  const totals = { fire: 0, earth: 0, air: 0, water: 0 };
+  questions.forEach(q => {
+    let v = state.answers[q.id] || 3;
+    if (q.rev) v = 6 - v;
+    totals[q.el] += v;
+  });
+  const pct = {};
+  Object.keys(totals).forEach(k => {
+    pct[k] = Math.round((totals[k] - 10) / 40 * 100);
+  });
+  const ranking = Object.keys(pct).sort((a, b) => pct[b] - pct[a]);
+  const primary = [ranking[0]];
+  const secondary = [ranking[1]];
+  if (pct[ranking[0]] - pct[ranking[1]] <= 5) {
+    primary.push(ranking[1]);
+    secondary.length = 0;
+    if (ranking[2] && pct[ranking[1]] - pct[ranking[2]] <= 5) secondary.push(ranking[2]);
+  } else {
+    if (ranking[2] && pct[ranking[1]] - pct[ranking[2]] <= 5) secondary.push(ranking[2]);
+  }
+  state.result = { totals, pct, primary, secondary, ranking };
+}
+
+// 渲染结果
+function renderResult() {
+  const r = state.result;
+  const colors = { fire:'fire', earth:'earth', air:'air', water:'water' };
+  const chart = document.getElementById('chart');
+  chart.innerHTML = r.ranking.map(k => `
+    <div class="bar-row">
+      <div class="bar-label"><span>${elementInfo[k].name}</span><span>${r.pct[k]}%</span></div>
+      <div class="bar-bg"><div class="bar-fill ${colors[k]}" style="width:${r.pct[k]}%"></div></div>
+    </div>
+  `).join('');
+
+  const p = r.primary[0];
+  const s = r.secondary[0];
+
+  if (r.primary.length > 1) {
+    const names = r.primary.map(k => elementInfo[k].name).join('与');
+    document.getElementById('summary').textContent =
+      `你目前同时较多使用 ${names} 的方式。你可能在不同情境下切换，这不是矛盾，而是一种可调适的弹性。`;
+    document.getElementById('primary-text').textContent =
+      `你的主要方式包括 ${names}。${elementInfo[p].desc}。`;
+  } else {
+    document.getElementById('summary').textContent =
+      `你目前更常以 ${elementInfo[p].name} 的方式回应世界：${elementInfo[p].desc}。你的副元素是 ${elementInfo[s].name}，它会在某些情境下补充你的主要方式。这描述的是一种当前倾向，而不是固定不变的人格。`;
+    document.getElementById('primary-text').textContent =
+      `你的主元素是${elementInfo[p].name}。${elementInfo[p].green}优势是${elementInfo[p].strengths}盲点是${elementInfo[p].blind}关系建议：${elementInfo[p].relation}`;
+  }
+
+  document.getElementById('secondary-text').textContent =
+    `你的副元素是${elementInfo[s].name}。它让你在${elementInfo[p].name}之外，也能${elementInfo[s].desc}。当情境需要时，你可以调用这种补充方式。`;
+
+  document.getElementById('relationship-list').innerHTML = `
+    <li>与火相处：直接、清楚、给出行动空间。</li>
+    <li>与土相处：明确计划、守时、说明变化原因。</li>
+    <li>与风相处：讨论想法、给表达空间、聚焦重点。</li>
+    <li>与水相处：先照顾感受、温和表达、给出安全感。</li>
+    <li>差异不是优劣，而是不同的语言。</li>
+  `;
+
+  document.getElementById('growth-list').innerHTML =
+    elementInfo[p].growth.map(g => `<li>${g}</li>`).join('');
+}
+
+// 提交到 Google 表单
+document.getElementById('btn-collect').addEventListener('click', () => {
+  const r = state.result;
+  const params = new URLSearchParams();
+  params.append(ENTRY.fire, r.pct.fire);
+  params.append(ENTRY.earth, r.pct.earth);
+  params.append(ENTRY.air, r.pct.air);
+  params.append(ENTRY.water, r.pct.water);
+  params.append(ENTRY.primary, r.primary.map(k => elementInfo[k].name).join('+'));
+  params.append(ENTRY.secondary, r.secondary.map(k => elementInfo[k].name).join('+'));
+  params.append(ENTRY.answers, JSON.stringify(state.answers));
+  const url = FORM_URL + '?' + params.toString();
+  window.open(url, '_blank');
+  document.getElementById('collect-note').textContent =
+    '已在新标签页打开提交页面，请点击“提交”完成。谢谢你！';
+});
+</script>
+</body>
+</html>
